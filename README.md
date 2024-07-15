@@ -1,2 +1,3 @@
-# dnd_game
-repo for the dnd_game using dnd_engine
+# DnD Game
+
+A Dungeons and Dragons 5e video game using pygame and pygame_gui.
