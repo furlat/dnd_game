@@ -138,5 +138,67 @@
                 "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_path_to_target.png"
             }
         }
+        
+    },
+    "@action_button_green": {
+        "colours": {
+            "normal_bg": "#00FF00",
+            "hovered_bg": "#22FF22",
+            "disabled_bg": "#006600",
+            "selected_bg": "#00FF00",
+            "active_bg": "#22FF22",
+            "normal_text": "#000000",
+            "hovered_text": "#000000",
+            "selected_text": "#000000",
+            "disabled_text": "#000000",
+            "active_text": "#000000",
+            "normal_border": "#000000",
+            "hovered_border": "#000000",
+            "disabled_border": "#000000",
+            "selected_border": "#000000",
+            "active_border": "#000000"
+        }
+    },
+    "@action_button_red": {
+        "colours": {
+            "normal_bg": "#FF0000",
+            "hovered_bg": "#FF2222",
+            "disabled_bg": "#660000",
+            "selected_bg": "#FF0000",
+            "active_bg": "#FF2222",
+            "normal_text": "#000000",
+            "hovered_text": "#000000",
+            "selected_text": "#000000",
+            "disabled_text": "#000000",
+            "active_text": "#000000",
+            "normal_border": "#000000",
+            "hovered_border": "#000000",
+            "disabled_border": "#000000",
+            "selected_border": "#000000",
+            "active_border": "#000000"
+        }
+    },
+    "@action_button_gray": {
+        "colours": {
+            "normal_bg": "#808080",
+            "hovered_bg": "#A0A0A0",
+            "disabled_bg": "#404040",
+            "selected_bg": "#808080",
+            "active_bg": "#A0A0A0",
+            "normal_text": "#000000",
+            "hovered_text": "#000000",
+            "selected_text": "#000000",
+            "disabled_text": "#000000",
+            "active_text": "#000000",
+            "normal_border": "#000000",
+            "hovered_border": "#000000",
+            "disabled_border": "#000000",
+            "selected_border": "#000000",
+            "active_border": "#000000"
+        }
     }
+
+
 }
+
+    

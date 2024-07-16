@@ -84,9 +84,11 @@ while is_running:
 
     manager.update(time_delta)
 
-    # Update actions window if active entity has changed
-    if actions_window.active_entity != battlemap_window.selected_entity:
-        actions_window.update_actions(battlemap_window.selected_entity)
+    # Update actions window if active entity or target has changed
+    if (actions_window.active_entity != battlemap_window.selected_entity or
+        actions_window.target_entity != battlemap_window.target_window.target_entity):
+        actions_window.update_actions(battlemap_window.selected_entity, battlemap_window.target_window.target_entity)
+
 
     window_surface.blit(background, (0, 0))
     manager.draw_ui(window_surface)
