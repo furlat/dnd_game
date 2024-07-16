@@ -4,6 +4,7 @@ from pygame.locals import *
 import os
 
 from neurodragon.ui.battlemap_window import create_battlemap_window, create_details_window
+from neurodragon.ui.music import create_music_manager
 
 pygame.init()
 width = 800
@@ -29,6 +30,9 @@ details_window = create_details_window(manager)
 # Create the battlemap window
 battlemap_window = create_battlemap_window(manager, details_window)
 
+# Create the music manager
+music_manager = create_music_manager(manager, width, height)
+
 while is_running:
     time_delta = clock.tick(60) / 1000.0
 
@@ -38,6 +42,7 @@ while is_running:
 
         manager.process_events(event)
         battlemap_window.process_event(event)
+        music_manager.handle_event(event)
 
     manager.update(time_delta)
 
