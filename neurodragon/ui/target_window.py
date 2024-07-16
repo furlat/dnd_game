@@ -13,7 +13,8 @@ SPRITE_PATHS = {
 class TargetWindow(UIWindow):
     def __init__(self, rect, manager):
         super().__init__(rect, manager, window_display_title='Target')
-
+        self.target_pos = None
+        self.target_entity = None
         text_width = rect.width - 120
         text_height = 80
         text_rect = pygame.Rect(10, 10, text_width, text_height + 10)
@@ -36,6 +37,8 @@ class TargetWindow(UIWindow):
 
     def update_details(self, target):
         if isinstance(target, Entity):
+            self.target_entity = target
+            self.target_pos = None
             details = f"Name: {target.name}<br>ID: {target.id}<br>Hit Points: {target.current_hit_points}/{target.max_hit_points}"
             self.text_element.set_text(details)
 
@@ -49,9 +52,13 @@ class TargetWindow(UIWindow):
 
             self.image_element.set_image(combined_surface)
         elif isinstance(target, tuple):
+            self.target_pos = target
+            self.target_entity = None
             details = f"Position: {target}"
             self.text_element.set_text(details)
             self.image_element.set_image(self.default_surface)
         else:
             self.text_element.set_text("No target selected.")
             self.image_element.set_image(self.default_surface)
+            self.target_pos = None
+            self.target_entity = None

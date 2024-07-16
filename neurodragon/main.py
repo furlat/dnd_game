@@ -7,6 +7,7 @@ from neurodragon.ui.battlemap_window import create_battlemap_window, create_deta
 from neurodragon.ui.music import create_music_manager
 from neurodragon.ui.active_entity_window import ActiveEntityWindow
 from neurodragon.ui.target_window import TargetWindow
+from neurodragon.ui.actions_window import create_actions_window
 
 
 def resize_image(original_path, resized_path, size):
@@ -33,7 +34,7 @@ def ensure_resized_images():
 ensure_resized_images()
 
 pygame.init()
-width = 800
+width = 1000
 height = 600
 factor = 1.7
 width *= factor
@@ -67,7 +68,8 @@ target_window = TargetWindow(target_window_rect, manager)
 
 # Create the battlemap window
 battlemap_window = create_battlemap_window(manager, details_window, active_entity_window, target_window)
-
+# Create the actions window
+actions_window = create_actions_window(manager, width, height)
 while is_running:
     time_delta = clock.tick(60) / 1000.0
 
@@ -78,12 +80,16 @@ while is_running:
         manager.process_events(event)
         battlemap_window.process_event(event)
         music_manager.handle_event(event)
+        actions_window.process_event(event)  # Add this line
 
     manager.update(time_delta)
+
+    # Update actions window if active entity has changed
+    if actions_window.active_entity != battlemap_window.selected_entity:
+        actions_window.update_actions(battlemap_window.selected_entity)
 
     window_surface.blit(background, (0, 0))
     manager.draw_ui(window_surface)
 
     pygame.display.update()
-
 pygame.quit()
