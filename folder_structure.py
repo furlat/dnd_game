@@ -2,7 +2,7 @@ import os
 
 # Define the list of directories and files to ignore
 IGNORE_DIRS = {'.git', '__pycache__', 'neurodragon.egg-info'}
-IGNORE_FILES = {'.gitignore','folder_structure.py'}
+IGNORE_FILES = {'.gitignore','folder_structure.py','start_me.py'}
 
 def print_directory_structure(startpath):
     for root, dirs, files in os.walk(startpath):

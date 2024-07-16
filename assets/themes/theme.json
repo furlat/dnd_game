@@ -1,0 +1,142 @@
+{
+    "@toggle_fov_button": {
+        "colours": {
+            "normal_bg": "#00000000",
+            "hovered_bg": "#00000000",
+            "disabled_bg": "#00000000",
+            "selected_bg": "#00000000",
+            "active_bg": "#00000000",
+            "normal_border": "#00000000",
+            "hovered_border": "#00000000",
+            "disabled_border": "#00000000",
+            "selected_border": "#00000000",
+            "active_border": "#00000000"
+        },
+        "images": {
+            "normal_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_toggle_fov.png"
+            },
+            "hovered_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_toggle_fov.png"
+            },
+            "selected_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_toggle_fov.png"
+            },
+            "disabled_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_toggle_fov.png"
+            }
+        }
+    },
+    "@color_fov_button": {
+        "colours": {
+            "normal_bg": "#00000000",
+            "hovered_bg": "#00000000",
+            "disabled_bg": "#00000000",
+            "selected_bg": "#00000000",
+            "active_bg": "#00000000",
+            "normal_border": "#00000000",
+            "hovered_border": "#00000000",
+            "disabled_border": "#00000000",
+            "selected_border": "#00000000",
+            "active_border": "#00000000"
+        },
+        "images": {
+            "normal_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_color_fov.png"
+            },
+            "hovered_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_color_fov.png"
+            },
+            "selected_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_color_fov.png"
+            },
+            "disabled_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_color_fov.png"
+            }
+        }
+    },
+    "@ray_to_target_button": {
+        "colours": {
+            "normal_bg": "#00000000",
+            "hovered_bg": "#00000000",
+            "disabled_bg": "#00000000",
+            "selected_bg": "#00000000",
+            "active_bg": "#00000000",
+            "normal_border": "#00000000",
+            "hovered_border": "#00000000",
+            "disabled_border": "#00000000",
+            "selected_border": "#00000000",
+            "active_border": "#00000000"
+        },
+        "images": {
+            "normal_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_ray_to_target.png"
+            },
+            "hovered_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_ray_to_target.png"
+            },
+            "selected_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_ray_to_target.png"
+            },
+            "disabled_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_ray_to_target.png"
+            }
+        }
+    },
+    "@toggle_paths_button": {
+        "colours": {
+            "normal_bg": "#00000000",
+            "hovered_bg": "#00000000",
+            "disabled_bg": "#00000000",
+            "selected_bg": "#00000000",
+            "active_bg": "#00000000",
+            "normal_border": "#00000000",
+            "hovered_border": "#00000000",
+            "disabled_border": "#00000000",
+            "selected_border": "#00000000",
+            "active_border": "#00000000"
+        },
+        "images": {
+            "normal_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_toggle_paths.png"
+            },
+            "hovered_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_toggle_paths.png"
+            },
+            "selected_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_toggle_paths.png"
+            },
+            "disabled_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_toggle_paths.png"
+            }
+        }
+    },
+    "@path_to_target_button": {
+        "colours": {
+            "normal_bg": "#00000000",
+            "hovered_bg": "#00000000",
+            "disabled_bg": "#00000000",
+            "selected_bg": "#00000000",
+            "active_bg": "#00000000",
+            "normal_border": "#00000000",
+            "hovered_border": "#00000000",
+            "disabled_border": "#00000000",
+            "selected_border": "#00000000",
+            "active_border": "#00000000"
+        },
+        "images": {
+            "normal_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_path_to_target.png"
+            },
+            "hovered_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_path_to_target.png"
+            },
+            "selected_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_path_to_target.png"
+            },
+            "disabled_image": {
+                "path": "C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\resized_50x50_path_to_target.png"
+            }
+        }
+    }
+}

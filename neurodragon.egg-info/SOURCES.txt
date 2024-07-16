@@ -8,5 +8,8 @@ neurodragon.egg-info/dependency_links.txt
 neurodragon.egg-info/top_level.txt
 neurodragon/models/__init__.py
 neurodragon/ui/__init__.py
+neurodragon/ui/active_entity_window.py
 neurodragon/ui/battlemap_window.py
+neurodragon/ui/music.py
 neurodragon/ui/stats_block_window.py
+neurodragon/ui/target_window.py

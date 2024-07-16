@@ -1,11 +1,10 @@
 import pygame
 import pygame_gui
-from pygame_gui.elements import UIWindow
-import pygame
-import pygame_gui
-from pygame_gui.elements import UIWindow
+from pygame_gui.elements import UIButton
+from pygame_gui.elements import UIWindow, UIImage, UITextBox
 from dnd.tests.example_bm import create_battlemap_with_entities
-from dnd.battlemap import MapDrawer, Entity
+from dnd.battlemap import Entity
+import time
 
 # Define a dictionary to map tiles to ASCII characters
 TILE_ASCII = {
@@ -24,22 +23,32 @@ SPRITE_PATHS = {
     'WALL': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\wall.png',
     'FLOOR': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\floor.png',
     'Goblin': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\goblin.png',
-    'Skeleton': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\skeleton.png'
+    'Skeleton': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\skeleton.png',
+    'toggle_fov': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\toggle_fov.png',
+    'color_fov': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\color_fov.png',
+    'ray_to_target': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\ray_to_target.png',
+    'toggle_paths': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\toggle_paths.png',
+    'path_to_target': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\path_to_target.png'
 }
-class BattleMapWindow(UIWindow):
-    active_window = None  # Class variable to track the active window
 
-    def __init__(self, rect, manager, battle_map, details_window):
+class BattleMapWindow(UIWindow):
+    active_window = None
+
+    def __init__(self, rect, manager, battle_map, details_window, active_entity_window, target_window):
         super().__init__(rect, manager, window_display_title='Battle Map')
 
         self.battle_map = battle_map
-        self.map_drawer = MapDrawer(self.battle_map)
         self.details_window = details_window
-        
-        # Create a surface to display the graphical representation of the battlemap
-        self.map_surface = pygame.Surface((rect.width, rect.height))
-        self.font = pygame.font.Font(None, 32)  # Define the font and size for ASCII characters
-        
+        self.active_entity_window = active_entity_window
+        self.target_window = target_window
+
+        button_width = 50  # Adjust width for buttons
+        button_height = 50
+        grey_column_width = button_width + 2  # Match button width
+
+        self.map_surface = pygame.Surface((rect.width - grey_column_width, rect.height))  # Adjust width for buttons
+        self.font = pygame.font.Font(None, 32)
+
         self.offset_x = 0
         self.offset_y = 0
 
@@ -47,42 +56,73 @@ class BattleMapWindow(UIWindow):
 
         self.render_battlemap()
 
-        self.image_element = pygame_gui.elements.UIImage(
-            relative_rect=pygame.Rect((0, 0), (rect.width, rect.height)),
+        self.last_left_clicked = None
+
+        self.image_element = UIImage(
+            relative_rect=pygame.Rect((0, 0), (rect.width - grey_column_width, rect.height)),  # Adjust width for buttons
             image_surface=self.map_surface,
             manager=manager,
             container=self
         )
 
+        # Create buttons
+        self.create_buttons(rect, manager, button_width, button_height, grey_column_width)
+        self.handled_events = []
+
+    def create_buttons(self, rect, manager, button_width, button_height, grey_column_width):
+        button_definitions = [
+            ('toggle_fov', 'Toggle FOV'),
+            ('color_fov', 'Color FOV'),
+            ('ray_to_target', 'Ray to Target'),
+            ('toggle_paths', 'Toggle Paths'),
+            ('path_to_target', 'Path to Target')
+        ]
+
+        button_x = rect.width - grey_column_width  # Align to the right edge
+        button_y = 0  # Start at the top
+
+        self.buttons = []
+
+        for button_id, tooltip in button_definitions:
+            button = UIButton(
+                relative_rect=pygame.Rect(button_x, button_y, button_width, button_height),
+                text='',
+                manager=manager,
+                container=self,
+                tool_tip_text=tooltip,
+                object_id=pygame_gui.core.ObjectID(class_id=f'@{button_id}_button')
+            )
+            button_image = pygame.image.load(SPRITE_PATHS[button_id])
+            button_image = pygame.transform.scale(button_image, (button_width, button_height))
+            button.set_image(button_image)
+            self.buttons.append(button)
+            button_y += button_height  # Move the next button down without spacing
+
     def render_battlemap(self):
-        tile_size = 32  # Define the size of each tile
+        tile_size = 32
 
-        self.map_surface.fill((0, 0, 0))  # Clear the surface
+        self.map_surface.fill((0, 0, 0))
 
-        self.grid_positions.clear()  # Clear the hashmap
+        self.grid_positions.clear()
 
-        # Draw the grid lines and store the positions
         for y in range(self.battle_map.height):
             for x in range(self.battle_map.width):
                 draw_x = (x - self.offset_x) * tile_size
                 draw_y = (y - self.offset_y) * tile_size
 
-                # Skip drawing out-of-bound tiles
                 if draw_x < 0 or draw_y < 0 or draw_x >= self.map_surface.get_width() or draw_y >= self.map_surface.get_height():
                     continue
 
                 pygame.draw.rect(self.map_surface, (50, 50, 50), (draw_x, draw_y, tile_size, tile_size), 1)
-                self.grid_positions[(x, y)] = (draw_x, draw_y)  # Store grid position as key, draw position as value
+                self.grid_positions[(x, y)] = (draw_x, draw_y)
 
                 entity_ids = self.battle_map.positions.get((x, y), None)
                 if entity_ids:
                     entity_ids = list(entity_ids)
-                    # Draw the first entity found at this position
                     entity = Entity.get_instance(entity_ids[0])
                     ascii_char = ENTITY_ASCII.get(entity.name, '?')
                     self.draw_ascii_char(ascii_char, draw_x, draw_y, tile_size, is_entity=True)
                 else:
-                    # Draw the tile if no entity is found
                     tile_type = self.battle_map.get_tile(x, y)
                     if tile_type:
                         ascii_char = TILE_ASCII.get(tile_type, ' ')
@@ -95,59 +135,95 @@ class BattleMapWindow(UIWindow):
         self.map_surface.blit(text_surface, text_rect)
 
     def process_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.rect.collidepoint(event.pos):
-                BattleMapWindow.active_window = self
-                container_rect = self.get_container().get_relative_rect()
-                relative_click_pos = (
-                    event.pos[0] - self.rect.left - container_rect.left - 10,  # Subtract 10 pixels from left
-                    event.pos[1] - self.rect.top - container_rect.top - 16  # Subtract 16 pixels from top
-                )
-                self.handle_click(relative_click_pos)
-        
-        if BattleMapWindow.active_window == self:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_w:
-                    self.offset_y = max(self.offset_y - 1, 0)
-                elif event.key == pygame.K_s:
-                    self.offset_y = min(self.offset_y + 1, self.battle_map.height - self.map_surface.get_height() // 32)
-                elif event.key == pygame.K_a:
-                    self.offset_x = max(self.offset_x - 1, 0)
-                elif event.key == pygame.K_d:
-                    self.offset_x = min(self.offset_x + 1, self.battle_map.width - self.map_surface.get_width() // 32)
+        if event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:
+                if not self.last_left_clicked:
+                    self.last_left_clicked = time.time()
+                    self.handle_left_click(event.pos)
+                elif time.time() - self.last_left_clicked < 0.5:
+                    self.handle_double_click(event.pos)
+                    self.last_left_clicked = None
+                else:
+                    self.last_left_clicked = None
+                    self.handle_left_click(event.pos)
+            elif event.button == 3:
+                self.handle_right_click(event.pos)
 
-                self.render_battlemap()
-                self.image_element.set_image(self.map_surface)
+        # Process button clicks
+        if event.type == pygame_gui.UI_BUTTON_PRESSED and not event in self.handled_events:
+            print(event,event.type,time.time())
+            if hasattr(event.ui_element, 'tool_tip_text'):
+                print(f"{event.ui_element.tool_tip_text} button clicked")
+                self.handled_events.append(event)
+                return
 
-    def handle_click(self, click_pos):
+        super().process_event(event)
+
+    def handle_click(self, click_pos, click_type):
         tile_size = 32
+        container_rect = self.get_container().get_relative_rect()
+        adjusted_click_pos = (
+            click_pos[0] - self.rect.left - container_rect.left - 10,
+            click_pos[1] - self.rect.top - container_rect.top - 16
+        )
 
-        clicked_grid_pos = None
         for grid_pos, draw_pos in self.grid_positions.items():
-            if (draw_pos[0] <= click_pos[0] < draw_pos[0] + tile_size and
-                draw_pos[1] <= click_pos[1] < draw_pos[1] + tile_size):
-                clicked_grid_pos = grid_pos
+            if (draw_pos[0] <= adjusted_click_pos[0] < draw_pos[0] + tile_size and
+                draw_pos[1] <= adjusted_click_pos[1] < draw_pos[1] + tile_size):
+                if click_type == 'left':
+                    self.update_details_window(grid_pos)
+                elif click_type == 'double':
+                    self.update_active_entity_window(grid_pos)
+                elif click_type == 'right':
+                    self.update_target_window(grid_pos)
                 break
 
-        if clicked_grid_pos:
-            grid_x, grid_y = clicked_grid_pos
-            print(f"Click position: {click_pos}, Grid position: ({grid_x}, {grid_y})")
+    def handle_left_click(self, click_pos):
+        self.handle_click(click_pos, 'left')
 
-            if 0 <= grid_x < self.battle_map.width and 0 <= grid_y < self.battle_map.height:
-                tile_type = self.battle_map.get_tile(grid_x, grid_y)
-                entity_ids = self.battle_map.positions.get((grid_x, grid_y), None)
-                entity_name = None
-                sprite_path = None
+    def handle_double_click(self, click_pos):
+        self.handle_click(click_pos, 'double')
 
-                if entity_ids:
-                    entity_ids = list(entity_ids)
-                    entity = Entity.get_instance(entity_ids[0])
-                    entity_name = entity.name
-                    sprite_path = SPRITE_PATHS.get(entity_name)
-                else:
-                    sprite_path = SPRITE_PATHS.get(tile_type)
+    def handle_right_click(self, click_pos):
+        self.handle_click(click_pos, 'right')
 
-                self.details_window.update_details((grid_x, grid_y), tile_type, entity_name, sprite_path)
+    def update_details_window(self, grid_pos):
+        tile_type = self.battle_map.get_tile(*grid_pos)
+        entity_ids = self.battle_map.positions.get(grid_pos, None)
+        entity_name = None
+        sprite_path = None
+
+        if entity_ids:
+            entity_ids = list(entity_ids)
+            entity = Entity.get_instance(entity_ids[0])
+            entity_name = entity.name
+            sprite_path = SPRITE_PATHS.get(entity_name)
+        else:
+            sprite_path = SPRITE_PATHS.get(tile_type)
+
+        self.details_window.update_details(grid_pos, tile_type, entity_name, sprite_path)
+
+    def update_active_entity_window(self, grid_pos):
+        entity_ids = self.battle_map.positions.get(grid_pos, None)
+        if entity_ids:
+            entity_id = list(entity_ids)[0]
+            entity = Entity.get_instance(entity_id)
+            self.active_entity_window.update_details(entity)
+
+    def update_target_window(self, grid_pos):
+        entity_ids = self.battle_map.positions.get(grid_pos, None)
+        if entity_ids:
+            entity_id = list(entity_ids)[0]
+            entity = Entity.get_instance(entity_id)
+            self.target_window.update_details(entity)
+        else:
+            self.target_window.update_details(grid_pos)
+
+# This function will be used in the main file to create and display the window
+def create_battlemap_window(manager, details_window, active_entity_window, target_window):
+    battle_map, goblin, skeleton = create_battlemap_with_entities()
+    window_rect = pygame.Rect(0, 0, 850, 400)  # Adjusted width for buttons
+    return BattleMapWindow(window_rect, manager, battle_map, details_window, active_entity_window, target_window)
 
 
 class DetailsWindow(UIWindow):
@@ -193,11 +269,6 @@ class DetailsWindow(UIWindow):
         self.image_element.set_image(combined_surface)
 
 # This function will be used in the main file to create and display the window
-def create_battlemap_window(manager, details_window):
-    battle_map, goblin, skeleton = create_battlemap_with_entities()
-    window_rect = pygame.Rect(0, 0, 800, 400)  # Adjusted size for tile rendering (20 tiles * 32px by 9 tiles * 32px)
-    return BattleMapWindow(window_rect, manager, battle_map, details_window)
-
 def create_details_window(manager):
     window_rect = pygame.Rect(820, 0, 400, 200)
     return DetailsWindow(window_rect, manager)
