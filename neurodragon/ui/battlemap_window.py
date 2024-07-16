@@ -68,6 +68,7 @@ class BattleMapWindow(UIWindow):
         # Create buttons
         self.create_buttons(rect, manager, button_width, button_height, grey_column_width)
         self.handled_events = []
+        self.handled_events_time = []
 
     def create_buttons(self, rect, manager, button_width, button_height, grey_column_width):
         button_definitions = [
@@ -150,11 +151,15 @@ class BattleMapWindow(UIWindow):
                 self.handle_right_click(event.pos)
 
         # Process button clicks
-        if event.type == pygame_gui.UI_BUTTON_PRESSED and not event in self.handled_events:
+        if event.type == pygame_gui.UI_BUTTON_PRESSED :
             print(event,event.type,time.time())
-            if hasattr(event.ui_element, 'tool_tip_text'):
+            if len(self.handled_events)>0 and event == self.handled_events[-1] and time.time() - self.handled_events_time[-1] < 0.5:
+                print(f"detected double click for {event}")
+            
+            elif hasattr(event.ui_element, 'tool_tip_text'):
                 print(f"{event.ui_element.tool_tip_text} button clicked")
                 self.handled_events.append(event)
+                self.handled_events_time.append(time.time())
                 return
 
         super().process_event(event)
