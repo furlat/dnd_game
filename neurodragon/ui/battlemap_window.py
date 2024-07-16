@@ -121,8 +121,8 @@ class BattleMapWindow(UIWindow):
                 visible_positions = self.selected_entity.sensory.fov.visible_tiles
             if self.paths_mode and self.selected_entity.sensory.paths:
                 # Calculate movement budget in blocks (5ft per block)
-                walk_speed = self.selected_entity.speed.get_speed('walk', self.selected_entity)
-                movement_budget = walk_speed // 5  # Integer division to get number of blocks
+                movement_budget_feet = self.selected_entity.action_economy.movement.get_value(self.selected_entity)
+                movement_budget = movement_budget_feet // 5  # Integer division to get number of blocks
                 reachable_positions = set(self.selected_entity.sensory.paths.get_reachable_positions(movement_budget))
 
         for y in range(self.battle_map.height):
@@ -226,8 +226,8 @@ class BattleMapWindow(UIWindow):
         path = self.selected_entity.sensory.paths.get_shortest_path_to_position(target_position)
         if path:
             # Calculate movement budget in blocks (5ft per block)
-            walk_speed = self.selected_entity.speed.get_speed('walk', self.selected_entity)
-            movement_budget = walk_speed // 5  # Integer division to get number of blocks
+            movement_budget_feet = self.selected_entity.action_economy.movement.get_value(self.selected_entity)
+            movement_budget = movement_budget_feet // 5  # Integer division to get number of blocks
             
             visible_positions = set()
             if self.fov_mode and self.selected_entity.sensory.fov:

@@ -36,7 +36,7 @@ class ActiveEntityWindow(UIWindow):
 
     def update_details(self, entity):
         if entity:
-            details = f"Name: {entity.name}<br>ID: {entity.id}<br>Hit Points: {entity.current_hit_points}/{entity.max_hit_points}"
+            details = f"Name: {entity.name}<br>Hit Points: {entity.current_hit_points}/{entity.max_hit_points}<br>ID: {entity.id}"
             self.text_element.set_text(details)
 
             # Update with the entity's sprite if available
