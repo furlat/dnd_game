@@ -3,7 +3,7 @@ import pygame_gui
 from pygame.locals import *
 import os
 
-from neurodragon.src.ui.battlemap_window import create_battlemap_window, create_details_window
+from neurodragon.ui.battlemap_window import create_battlemap_window, create_details_window
 
 pygame.init()
 width = 800
@@ -15,7 +15,7 @@ height *= factor
 window_surface = pygame.display.set_mode((int(width), int(height)))
 pygame.display.set_caption('NeuroDragonV0')
 
-background_path = os.path.join('neurodragon','assets', 'backgrounds', 'glitched_neurodragon.png')
+background_path = os.path.join('assets', 'backgrounds', 'glitched_neurodragon.png')
 background = pygame.image.load(background_path)
 
 manager = pygame_gui.UIManager((int(width), int(height)))

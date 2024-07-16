@@ -1,6 +1,9 @@
 import pygame
 import pygame_gui
 from pygame_gui.elements import UIWindow
+import pygame
+import pygame_gui
+from pygame_gui.elements import UIWindow
 from dnd.tests.example_bm import create_battlemap_with_entities
 from dnd.battlemap import MapDrawer, Entity
 
@@ -18,10 +21,10 @@ ENTITY_ASCII = {
 
 # Define a dictionary to map tiles and entities to sprite file paths
 SPRITE_PATHS = {
-    'WALL': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\neurodragon\\assets\\sprites\\wall.png',
-    'FLOOR': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\neurodragon\\assets\\sprites\\floor.png',
-    'Goblin': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\neurodragon\\assets\\sprites\\goblin.png',
-    'Skeleton': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\neurodragon\\assets\\sprites\\skeleton.png'
+    'WALL': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\wall.png',
+    'FLOOR': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\floor.png',
+    'Goblin': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\goblin.png',
+    'Skeleton': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\skeleton.png'
 }
 class BattleMapWindow(UIWindow):
     active_window = None  # Class variable to track the active window
@@ -145,31 +148,7 @@ class BattleMapWindow(UIWindow):
                     sprite_path = SPRITE_PATHS.get(tile_type)
 
                 self.details_window.update_details((grid_x, grid_y), tile_type, entity_name, sprite_path)
-import pygame
-import pygame_gui
-from pygame_gui.elements import UIWindow
-from dnd.tests.example_bm import create_battlemap_with_entities
-from dnd.battlemap import MapDrawer, Entity
 
-# Define a dictionary to map tiles to ASCII characters
-TILE_ASCII = {
-    'WALL': '#',
-    'FLOOR': '.'
-}
-
-# Define a dictionary to map entities to ASCII characters
-ENTITY_ASCII = {
-    'Goblin': 'g',
-    'Skeleton': 's'
-}
-
-# Define a dictionary to map tiles and entities to sprite file paths
-SPRITE_PATHS = {
-    'WALL': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\neurodragon\\assets\\sprites\\wall.png',
-    'FLOOR': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\neurodragon\\assets\\sprites\\floor.png',
-    'Goblin': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\neurodragon\\assets\\sprites\\goblin.png',
-    'Skeleton': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\neurodragon\\assets\\sprites\\skeleton.png'
-}
 
 class DetailsWindow(UIWindow):
     def __init__(self, rect, manager):

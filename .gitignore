@@ -1,2 +1,3 @@
 *.pyc
 /neurodragon.egg-info
+/neurodragon/src/__pycache__
