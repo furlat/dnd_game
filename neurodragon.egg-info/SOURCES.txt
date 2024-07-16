@@ -1,0 +1,6 @@
+README.md
+setup.py
+neurodragon.egg-info/PKG-INFO
+neurodragon.egg-info/SOURCES.txt
+neurodragon.egg-info/dependency_links.txt
+neurodragon.egg-info/top_level.txt
