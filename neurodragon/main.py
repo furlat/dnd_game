@@ -3,11 +3,11 @@ import pygame_gui
 from pygame.locals import *
 import os
 
-from neurodragon.ui.battlemap_window import create_battlemap_window, create_details_window
+from neurodragon.ui.battlemap_window import create_battlemap_window, create_details_window, SPRITE_PATHS
 from neurodragon.ui.music import create_music_manager
 from neurodragon.ui.active_entity_window import ActiveEntityWindow
 from neurodragon.ui.target_window import TargetWindow
-from neurodragon.ui.actions_window import create_actions_window
+from neurodragon.ui.actions_window import create_actions_window, ACTION_COMPLETED
 
 
 def resize_image(original_path, resized_path, size):
@@ -74,13 +74,33 @@ while is_running:
     time_delta = clock.tick(60) / 1000.0
 
     for event in pygame.event.get():
+        
         if event.type == QUIT:
             is_running = False
-
-        manager.process_events(event)
-        battlemap_window.process_event(event)
-        music_manager.handle_event(event)
-        actions_window.process_event(event)  # Add this line
+        
+        elif event.type == ACTION_COMPLETED:
+            print("Action completed event received.")
+            # Update all relevant windows
+            battlemap_window.render_battlemap()
+            if battlemap_window.selected_entity:
+                position = battlemap_window.selected_entity.get_position()
+                tile_type = battlemap_window.battle_map.get_tile(*position)
+                entity_name = battlemap_window.selected_entity.name
+                sprite_path = SPRITE_PATHS.get(entity_name)
+                details_window.update_details(position, tile_type, entity_name, sprite_path)
+            else:
+                details_window.clear_details()
+            active_entity_window.update_details(battlemap_window.selected_entity)
+            target_window.update_details(battlemap_window.target_window.target_entity)
+            actions_window.update_actions(battlemap_window.selected_entity, battlemap_window.target_window.target_entity,force_update=True)
+        else:
+            # print("normal event", event)
+            
+            battlemap_window._process_event(event)
+            music_manager.handle_event(event)
+            actions_window._process_event(event)  # Add this line
+            manager.process_events(event)
+            
 
     manager.update(time_delta)
 
@@ -88,6 +108,7 @@ while is_running:
     if (actions_window.active_entity != battlemap_window.selected_entity or
         actions_window.target_entity != battlemap_window.target_window.target_entity):
         actions_window.update_actions(battlemap_window.selected_entity, battlemap_window.target_window.target_entity)
+
 
 
     window_surface.blit(background, (0, 0))

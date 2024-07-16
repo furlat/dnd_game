@@ -270,18 +270,21 @@ class BattleMapWindow(UIWindow):
         text_surface = self.font.render(char, True, color)
         text_rect = text_surface.get_rect(center=(x + tile_size // 2, y + tile_size // 2))
         surface.blit(text_surface, text_rect)
-    def process_event(self, event):
-        if event.type == pygame.MOUSEBUTTONUP:
+    def _process_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
+                print(f"Left click at {event.pos}, last left click: {self.last_left_clicked} at distance {time.time() - self.last_left_clicked if self.last_left_clicked else None}")
                 if not self.last_left_clicked:
                     self.last_left_clicked = time.time()
                     self.handle_left_click(event.pos)
                 elif time.time() - self.last_left_clicked < 0.5:
+                    print(f"Double click detected at {event.pos} with timedelta {time.time() - self.last_left_clicked}")
                     self.handle_double_click(event.pos)
-                    self.last_left_clicked = None
+                    self.last_left_clicked = time.time()
                 else:
-                    self.last_left_clicked = None
+                    print(f"Single click detected at {event.pos} with timedelta {time.time() - self.last_left_clicked}")
                     self.handle_left_click(event.pos)
+                    self.last_left_clicked = time.time()
             elif event.button == 3:
                 self.handle_right_click(event.pos)
 
@@ -358,11 +361,8 @@ class BattleMapWindow(UIWindow):
             entity = Entity.get_instance(entity_ids[0])
             entity_name = entity.name
             sprite_path = SPRITE_PATHS.get(entity_name)
-            # self.selected_entity = entity
-            # print(f"Selected entity: {self.selected_entity.id} at {self.selected_entity.sensory.origin}")
         else:
             sprite_path = SPRITE_PATHS.get(tile_type)
-            # self.selected_entity = None
 
         self.details_window.update_details(grid_pos, tile_type, entity_name, sprite_path)
         self.render_battlemap()  # Re-render the map to reflect the selection
@@ -428,7 +428,7 @@ class DetailsWindow(UIWindow):
 
         combined_surface = pygame.Surface((80, 80), pygame.SRCALPHA)
         tile_sprite_path = SPRITE_PATHS.get(tile_type)
-        entity_sprite_path = SPRITE_PATHS.get(entity_name)
+        entity_sprite_path = sprite_path
 
         if tile_sprite_path:
             tile_sprite_surface = pygame.image.load(tile_sprite_path).convert_alpha()
@@ -439,6 +439,10 @@ class DetailsWindow(UIWindow):
             combined_surface.blit(entity_sprite_surface, (0, 0))
 
         self.image_element.set_image(combined_surface)
+
+    def clear_details(self):
+        self.text_element.set_text("No details available")
+        self.image_element.set_image(self.default_surface)
 
 # This function will be used in the main file to create and display the window
 def create_details_window(manager):
