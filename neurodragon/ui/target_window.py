@@ -39,7 +39,7 @@ class TargetWindow(UIWindow):
         if isinstance(target, Entity):
             self.target_entity = target
             self.target_pos = None
-            details = f"Name: {target.name}<br>Hit Points: {target.current_hit_points}/{target.max_hit_points}<br>ID: {target.id}"
+            details = f"Name: {target.name}<br>Hit Points: {target.hp}/{target.health.max_hit_points}<br>ID: {target.id}"
             self.text_element.set_text(details)
 
             # Update with the entity's sprite if available

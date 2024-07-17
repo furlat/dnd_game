@@ -1,6 +1,8 @@
 import pygame
 import pygame_gui
 from pygame_gui.elements import UIWindow, UITextBox, UIImage
+from dnd.battlemap import Entity
+from typing import Optional
 
 # Define a dictionary to map tiles and entities to sprite file paths
 SPRITE_PATHS = {
@@ -34,9 +36,9 @@ class ActiveEntityWindow(UIWindow):
             container=self
         )
 
-    def update_details(self, entity):
+    def update_details(self, entity:Optional[Entity]):
         if entity:
-            details = f"Name: {entity.name}<br>Hit Points: {entity.current_hit_points}/{entity.max_hit_points}<br>ID: {entity.id}"
+            details = f"Name: {entity.name}<br>Hit Points: {entity.hp}/{entity.health.max_hit_points}<br>ID: {entity.id}"
             self.text_element.set_text(details)
 
             # Update with the entity's sprite if available
