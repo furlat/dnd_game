@@ -1,3 +1,4 @@
 *.pyc
 /neurodragon.egg-info
 /neurodragon/src/__pycache__
+assets/battlemaps/EpicIsometric_Dungeon_Ethereal_Crystals.jpg
