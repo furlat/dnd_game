@@ -2,10 +2,9 @@ from dnd.monsters.goblin import create_goblin
 from dnd.monsters.skeleton import create_skeleton
 from dnd.dnd_enums import AttackType, AttackHand, RangeType, ActionType
 from dnd.actions import Attack, ActionCost
+from dnd.statsblock import StatsBlock
 
-from pydantic import BaseModel, Field
-from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field,computed_field
 from typing import Optional, List
 from dnd.logger import (ActionLog, AttackRollOut, DamageRollOut, ValueOut, 
                         AttackBonusOut, WeaponAttackBonusOut)
@@ -13,9 +12,17 @@ from dnd.dnd_enums import AdvantageStatus, AutoHitStatus, CriticalStatus
 
 class ActionText(BaseModel):
     action_log: ActionLog
-    attacker_name: str
-    defender_name: str
+    attacker: StatsBlock
+    defender: StatsBlock
     verbose_level: int = Field(default=1, ge=0, le=2)
+
+    @computed_field
+    def attacker_name(self) -> str:
+        return self.attacker.name
+    
+    @computed_field
+    def defender_name(self) -> str:
+        return self.defender.name
 
     def to_html(self) -> str:
         if self.verbose_level == 0:
@@ -56,7 +63,7 @@ class ActionText(BaseModel):
         attack_roll = self._get_attack_roll()
         damage_roll = self._get_damage_roll()
 
-        text = f"<p><b>{self.attacker_name}'s turn:</b><br>"
+        text = f"<p><b><a href=\"entity:{self.attacker.id}\">{self.attacker.name}</a>'s turn:</b><br>"
         text += f"  - Action: Attack with {attack_roll.hand.value}<br>"
         text += f"{self._format_attack_roll(attack_roll, detailed=True)}"
         text += f"  - Result: {'Hit' if self.action_log.success else 'Miss'}<br>"
@@ -73,7 +80,7 @@ class ActionText(BaseModel):
         total = attack_roll.total_roll
         ac = attack_roll.total_target_ac
         return (f"  - Attack Roll: {base_roll} (d20) + {modifiers} = {total}<br>"
-                f"  - Target: {self.defender_name} (AC {ac})<br>")
+                f"  - Target: <a href=\"entity:{self.defender.id}\">{self.defender.name}</a> (AC {ac})<br>")
 
     def _format_damage_roll(self, damage_roll: DamageRollOut, detailed: bool) -> str:
         dice_roll = damage_roll.dice_roll.result
@@ -168,12 +175,20 @@ class CombatSimulator:
         self.goblin.sensory.update_fov(set([(1, 0)]))
         self.skeleton.sensory.update_fov(set([(0, 0)]))
 
-        self.melee_attack = Attack(
-            name="Melee Attack",
-            description="A basic melee attack",
-            cost=[ActionCost(type=ActionType.ACTION, cost=1)],
+        self.melee_attack_right = Attack(
+            name="Melee Attack with right hand",
+            description="A basic melee attack with the right hand",
             attack_type=AttackType.MELEE_WEAPON,
             attack_hand=AttackHand.MELEE_RIGHT,
+            range_type=RangeType.REACH,
+            range_normal=5
+        )
+
+        self.melee_attack_left = Attack(
+            name="Melee Attack with left hand",
+            description="A basic melee attack with the left hand",
+            attack_type=AttackType.MELEE_WEAPON,
+            attack_hand=AttackHand.MELEE_LEFT,
             range_type=RangeType.REACH,
             range_normal=5
         )
@@ -190,13 +205,17 @@ class CombatSimulator:
             defender = self.skeleton if attacker == self.goblin else self.goblin
             
             attacker.action_economy.reset()
-            attack_logs = self.melee_attack.apply(attacker, defender)
+            if attacker == self.goblin:
+                attack_action = self.melee_attack_left
+            else:
+                attack_action = self.melee_attack_right
+            attack_logs = attack_action.apply(attacker, defender)
             
             action_texts = [
                 ActionText(
                     action_log=log,
-                    attacker_name=attacker.name,
-                    defender_name=defender.name,
+                    attacker=attacker,
+                    defender=defender,
                     verbose_level=2  # Set to 2 for highly detailed output
                 ) for log in attack_logs
             ]

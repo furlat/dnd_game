@@ -1,14 +1,15 @@
 import pygame
 import pygame_gui
 from combat import CombatSimulator, ActionText
+from character_info import CharacterInfoWindow
 
 pygame.init()
 
 pygame.display.set_caption('Combat Log')
-window_surface = pygame.display.set_mode((800, 600))
-manager = pygame_gui.UIManager((800, 600))
+window_surface = pygame.display.set_mode((1600, 1200))
+manager = pygame_gui.UIManager((1600, 1200))
 
-background = pygame.Surface((800, 600))
+background = pygame.Surface((1600, 1200))
 background.fill(pygame.Color("#000000"))
 
 combat_log = pygame_gui.elements.UITextBox(
@@ -23,9 +24,7 @@ combat_iterator = iter(combat_simulator)
 clock = pygame.time.Clock()
 is_running = True
 
-def format_log_entry(action_text: ActionText):
-    color = "#FF0000" if action_text.attacker_name == "Goblin" else "#00FF00"
-    return f'<font color={color}>{action_text.to_html()}</font>'
+character_windows = {}
 
 while is_running:
     time_delta = clock.tick(60)/1000.0
@@ -36,11 +35,37 @@ while is_running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 try:
-                    action_texts = next(combat_iterator)
-                    for action_text in action_texts:
-                        combat_log.append_html_text(format_log_entry(action_text))
+                    logs = next(combat_iterator)
+                    for log in logs:
+                        combat_log.append_html_text(log.to_html())
+                        #check if character wrindow exists
+                    if log.attacker.id  in character_windows:
+                        #update the character window
+                        print(f"updating {log.attacker.id}")
+                        character_windows[log.attacker.id].update_character_info(log.attacker)
+                        character_windows[log.attacker.id].info_textbox._reparse_and_rebuild()
+                    if log.defender.id in character_windows:
+                        print(f"updating {log.defender.id}")
+                        character_windows[log.defender.id].update_character_info(log.defender)
+                        character_windows[log.defender.id].info_textbox._reparse_and_rebuild()
                 except StopIteration:
                     combat_log.append_html_text("<br>Combat has ended!")
+
+        if event.type == pygame_gui.UI_TEXT_BOX_LINK_CLICKED:
+            if event.link_target.startswith("entity:"):
+                entity_id = event.link_target.split(":")[1]
+                if entity_id not in character_windows:
+                    if entity_id == combat_simulator.goblin.id:
+                        character = combat_simulator.goblin
+                    elif entity_id == combat_simulator.skeleton.id:
+                        character = combat_simulator.skeleton
+                    else:
+                        continue
+                    
+                    character_windows[entity_id] = CharacterInfoWindow(manager, character)
+                else:
+                    character_windows[entity_id].show()
+
         manager.process_events(event)
 
     manager.update(time_delta)
