@@ -3,8 +3,8 @@ import pygame_gui
 from pygame_gui.elements import UIWindow, UIButton
 from pygame_gui.core import ObjectID
 from typing import List, Optional
-from dnd.actions import Attack, DcAttack
-
+from dnd.actions import Attack, MovementAction, Action
+from dnd.battlemap  import Entity
 # At the top of your file, after other imports
 ACTION_COMPLETED = pygame.USEREVENT + 777
 
@@ -58,11 +58,11 @@ class ActionsWindow(UIWindow):
             )
             self.action_buttons.append(button)
 
-    def _get_button_theme(self, action):
-        if isinstance(action, (Attack, DcAttack)) and self.target_entity:
-            print(f"Checking prerequisites for action: {action.name}")
+    def _get_button_theme(self, action: Action):
+        if isinstance(action, (Attack)) and self.target_entity:
+            print(f"Checking check_prerequisitess for action: {action.name}")
             context = {"action": action}
-            can_perform, failed_conditions = action.prerequisite(self.active_entity, self.target_entity, context)
+            can_perform, failed_conditions = action.check_prerequisites(self.active_entity, self.target_entity, context)
             if can_perform:
                 print(f"Prerequisites passed for action: {action.name}")
                 return "@action_button_green"
@@ -90,11 +90,11 @@ class ActionsWindow(UIWindow):
 
     def _handle_action_click(self, action_index):
         if 0 <= action_index < len(self.actions):
-            action = self.actions[action_index]
+            action : Action = self.actions[action_index]
             context = {"action": action}
             print(f"Action clicked: {action.name}")
-            if isinstance(action, (Attack, DcAttack)) and self.target_entity:
-                can_perform, failed_conditions = action.prerequisite(self.active_entity, self.target_entity, context)
+            if isinstance(action, (Attack)) and self.target_entity:
+                can_perform, failed_conditions = action.check_prerequisites(self.active_entity, self.target_entity, context)
                 if can_perform:
                     print(f"Performing action: {action.name}")
                     result = action.apply(self.target_entity, context)

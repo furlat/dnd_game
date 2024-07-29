@@ -175,22 +175,20 @@ class CombatSimulator:
         self.goblin.sensory.update_fov(set([(1, 0)]))
         self.skeleton.sensory.update_fov(set([(0, 0)]))
 
-        self.melee_attack_right = Attack(
+        self.melee_attack_right_skeleton = Attack(
             name="Melee Attack with right hand",
             description="A basic melee attack with the right hand",
             attack_type=AttackType.MELEE_WEAPON,
             attack_hand=AttackHand.MELEE_RIGHT,
-            range_type=RangeType.REACH,
-            range_normal=5
+            source=self.skeleton,
         )
 
-        self.melee_attack_left = Attack(
+        self.melee_attack_left_goblin = Attack(
             name="Melee Attack with left hand",
             description="A basic melee attack with the left hand",
             attack_type=AttackType.MELEE_WEAPON,
             attack_hand=AttackHand.MELEE_LEFT,
-            range_type=RangeType.REACH,
-            range_normal=5
+            source=self.goblin,
         )
         self.round = 0
         self.max_rounds = 5
@@ -206,11 +204,12 @@ class CombatSimulator:
             
             attacker.action_economy.reset()
             if attacker == self.goblin:
-                attack_action = self.melee_attack_left
+                attack_action = self.melee_attack_left_goblin
             else:
-                attack_action = self.melee_attack_right
+                attack_action = self.melee_attack_right_skeleton
             attack_logs = attack_action.apply(attacker, defender)
-            
+            print("attacker_actions",attacker.action_economy.actions.apply(attacker).total_bonus)
+            print("attacker bonus_actions",attacker.action_economy.bonus_actions.apply(attacker).total_bonus)
             action_texts = [
                 ActionText(
                     action_log=log,
