@@ -69,7 +69,7 @@ def create_battlemap_with_entities():
     skeleton = Entity.from_stats_block(create_skeleton())
 
     # Set initial positions
-    battle_map.add_entity(goblin, (1, 1))
+    battle_map.add_entity(goblin, (18, 1))
     battle_map.add_entity(skeleton, (18, 7))
 
 

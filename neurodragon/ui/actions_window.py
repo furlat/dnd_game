@@ -91,7 +91,7 @@ class ActionsWindow(UIWindow):
             else:
                 target = action.target or self.active_entity
             
-            result = action.apply(context= context)
+            result = action.apply()
             self.handled_action = result
             print(f"Action result: {result}")
             pygame.event.post(pygame.event.Event(ACTION_COMPLETED))
