@@ -74,16 +74,14 @@ while is_running:
     time_delta = clock.tick(60) / 1000.0
 
     for event in pygame.event.get():
-        
         if event.type == QUIT:
             is_running = False
-        
         elif event.type == ACTION_COMPLETED:
-            print("Action completed event received.")
+            print("Action completed event received in main loop")
             # Update all relevant windows
             battlemap_window.render_battlemap()
             if battlemap_window.selected_entity:
-                position = battlemap_window.selected_entity.get_position()
+                position = battlemap_window.selected_entity.position
                 tile_type = battlemap_window.battle_map.get_tile(*position)
                 entity_name = battlemap_window.selected_entity.name
                 sprite_path = SPRITE_PATHS.get(entity_name)
@@ -92,13 +90,11 @@ while is_running:
                 details_window.clear_details()
             active_entity_window.update_details(battlemap_window.selected_entity)
             target_window.update_details(battlemap_window.target_window.target_entity)
-            actions_window.update_actions(battlemap_window.selected_entity, battlemap_window.target_window.target_entity,force_update=True)
+            actions_window.handle_action_completed()  # Add this line
         else:
-            # print("normal event", event)
-            
             battlemap_window._process_event(event)
             music_manager.handle_event(event)
-            actions_window._process_event(event)  # Add this line
+            actions_window._process_event(event)
             manager.process_events(event)
             
 

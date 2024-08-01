@@ -4,8 +4,8 @@ from pygame_gui.elements import UIWindow, UIButton
 from pygame_gui.core import ObjectID
 from typing import List, Optional
 from dnd.actions import Attack, MovementAction, Action
-from dnd.battlemap  import Entity
-# At the top of your file, after other imports
+from dnd.battlemap import Entity
+
 ACTION_COMPLETED = pygame.USEREVENT + 777
 
 class ActionsWindow(UIWindow):
@@ -16,7 +16,7 @@ class ActionsWindow(UIWindow):
         self.target_entity = None
         self.actions = []
         self.action_buttons = []
-        self.handled_action=None
+        self.handled_action = None
 
         self.actions_container = pygame_gui.elements.UIScrollingContainer(
             relative_rect=pygame.Rect(0, 0, rect.width, rect.height),
@@ -24,17 +24,16 @@ class ActionsWindow(UIWindow):
             container=self
         )
 
-    def update_actions(self, entity, target_entity=None, force_update=False):
-        if force_update or entity != self.active_entity or target_entity != self.target_entity:
+    def update_actions(self, entity: Entity, target_entity: Optional[Entity] = None):
+        if entity != self.active_entity or target_entity != self.target_entity:
             self.active_entity = entity
             self.target_entity = target_entity
-            if entity:
-                print(f"Updating actions for entity: {entity.name}")
-                entity.update_available_actions()
-                self.actions = entity.actions
-            else:
-                self.actions = []
-            self._create_action_buttons()
+        if entity:
+            print(f"Updating actions for entity: {entity.name}")
+            self.actions = entity.actions  # Now using the computed actions field
+        else:
+            self.actions = []
+        self._create_action_buttons()
 
     def _create_action_buttons(self):
         # Clear existing buttons
@@ -59,18 +58,17 @@ class ActionsWindow(UIWindow):
             self.action_buttons.append(button)
 
     def _get_button_theme(self, action: Action):
-        if isinstance(action, (Attack)) and self.target_entity:
-            print(f"Checking check_prerequisitess for action: {action.name}")
+        if isinstance(action, Attack) and self.target_entity:
             context = {"action": action}
-            can_perform, failed_conditions = action.check_prerequisites(self.active_entity, self.target_entity, context)
-            if can_perform:
-                print(f"Prerequisites passed for action: {action.name}")
-                return "@action_button_green"
-            else:
-                print(f"Prerequisites failed for action: {action.name}")
-                print(f"Failed conditions: {failed_conditions}")
-                return "@action_button_red"
-        return "@action_button_gray"  # Default color for non-attack actions or when no target is selected
+            can_perform, _ = action.check_prerequisites(self.active_entity, self.target_entity, context)
+            return "@action_button_green" if can_perform else "@action_button_red"
+        elif isinstance(action, MovementAction):
+            return "@action_button_blue"  # New color for movement actions
+        return "@action_button_gray"  # Default color for other actions or when no target is selected
+
+    def handle_action_completed(self):
+        print("Handling action completed in ActionsWindow")
+        self.update_actions(self.active_entity, self.target_entity)
 
     def _process_event(self, event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
@@ -78,39 +76,28 @@ class ActionsWindow(UIWindow):
                 if event.ui_element == button:
                     self._handle_action_click(i)
                     break
-        # elif event.type == pygame.USEREVENT:
-        #     if hasattr(event, 'user_type'):
-        #         if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-        #             for i, button in enumerate(self.action_buttons):
-        #                 if event.ui_element == button:
-        #                     self._handle_action_click(i)
-        #                     break
-        
-        # super().process_event(event)
+        elif event.type == ACTION_COMPLETED:
+            self.handle_action_completed()
+        super().process_event(event)
 
     def _handle_action_click(self, action_index):
         if 0 <= action_index < len(self.actions):
-            action : Action = self.actions[action_index]
+            action: Action = self.actions[action_index]
             context = {"action": action}
             print(f"Action clicked: {action.name}")
-            if isinstance(action, (Attack)) and self.target_entity:
-                can_perform, failed_conditions = action.check_prerequisites(self.active_entity, self.target_entity, context)
-                if can_perform:
-                    print(f"Performing action: {action.name}")
-                    result = action.apply(self.target_entity, context)
-                    self.handled_action = result
-                    print(f"Action result: {result}")
-                    pygame.event.post(pygame.event.Event(ACTION_COMPLETED))
-                else:
-                    print(f"Cannot perform action: {action.name}")
-                    print(f"Failed conditions: {failed_conditions}")
+            
+            if isinstance(action, Attack) and self.target_entity:
+                target = self.target_entity
             else:
-                print(f"Performing action: {action.name}")
-                result = action.apply(self.active_entity, context=context)
-                print(f"Action result: {result}")
-                self.handled_action = result
-                pygame.event.post(pygame.event.Event(ACTION_COMPLETED))
-        self.update_actions(self.active_entity, self.target_entity)
+                target = action.target or self.active_entity
+            
+            result = action.apply(context= context)
+            self.handled_action = result
+            print(f"Action result: {result}")
+            pygame.event.post(pygame.event.Event(ACTION_COMPLETED))
+            
+            # Update actions after performing an action
+            self.update_actions(self.active_entity, self.target_entity)
 
 def create_actions_window(manager, width, height):
     window_rect = pygame.Rect(int(width) - 300, 0, 300, int(height) - 150)

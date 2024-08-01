@@ -2,8 +2,9 @@ import pygame
 import pygame_gui
 from pygame_gui.elements import UIButton
 from pygame_gui.elements import UIWindow, UIImage, UITextBox
-from dnd.tests.example_bm import create_battlemap_with_entities
-from dnd.battlemap import Entity
+from dnd.battlemap import Entity, BattleMap
+from dnd.monsters.goblin import create_goblin
+from dnd.monsters.skeleton import create_skeleton
 import time
 from typing import Optional, Tuple
 
@@ -31,6 +32,48 @@ SPRITE_PATHS = {
     'toggle_paths': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\toggle_paths.png',
     'path_to_target': 'C:\\Users\\Tommaso\\Documents\\Dev\\dnd_game\\assets\\sprites\\path_to_target.png'
 }
+
+def create_battlemap_with_entities():
+    # Define the map as a string
+    map_str = '''
+####################
+#........#.........#
+#...###..#....#....#
+#...###..#....#....#
+#...###..#....#....#
+#........#....#....#
+#.............#....#
+#........#....#....#
+####################
+    '''.strip()  # Use strip() to remove the first and last newlines
+
+    width = 20
+    height = 9
+
+    # Create a BattleMap instance
+    battle_map = BattleMap(width=width, height=height)
+
+    # Populate the map with tiles
+    map_list = list(map_str.splitlines())
+    for y, row in enumerate(map_list):
+        for x, char in enumerate(row):
+            if char == '#':
+                battle_map.set_tile(x, y, "WALL")
+            elif char == '.':
+                battle_map.set_tile(x, y, "FLOOR")
+
+
+
+    # Create entities
+    goblin = Entity.from_stats_block(create_goblin())
+    skeleton = Entity.from_stats_block(create_skeleton())
+
+    # Set initial positions
+    battle_map.add_entity(goblin, (1, 1))
+    battle_map.add_entity(skeleton, (18, 7))
+
+
+    return battle_map, goblin, skeleton
 
 class BattleMapWindow(UIWindow):
     active_window = None
@@ -121,7 +164,7 @@ class BattleMapWindow(UIWindow):
                 visible_positions = self.selected_entity.sensory.fov.visible_tiles
             if self.paths_mode and self.selected_entity.sensory.paths:
                 # Calculate movement budget in blocks (5ft per block)
-                movement_budget_feet = self.selected_entity.action_economy.movement.get_value(self.selected_entity)
+                movement_budget_feet = self.selected_entity.action_economy.movement.apply(self.selected_entity).total_bonus
                 movement_budget = movement_budget_feet // 5  # Integer division to get number of blocks
                 reachable_positions = set(self.selected_entity.sensory.paths.get_reachable_positions(movement_budget))
 
@@ -188,7 +231,7 @@ class BattleMapWindow(UIWindow):
         if not target_position:
             return
 
-        source_position = self.selected_entity.get_position()
+        source_position = self.selected_entity.position
         if not source_position:
             return
 
@@ -226,7 +269,7 @@ class BattleMapWindow(UIWindow):
         path = self.selected_entity.sensory.paths.get_shortest_path_to_position(target_position)
         if path:
             # Calculate movement budget in blocks (5ft per block)
-            movement_budget_feet = self.selected_entity.action_economy.movement.get_value(self.selected_entity)
+            movement_budget_feet = self.selected_entity.action_economy.movement.apply(self.selected_entity).total_bonus
             movement_budget = movement_budget_feet // 5  # Integer division to get number of blocks
             
             visible_positions = set()
