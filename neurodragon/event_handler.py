@@ -13,14 +13,6 @@ class GameEventType(Enum):
     ACTION_LOG = auto()
     UPDATE_ACTIONS = auto()
     RENDER_BATTLEMAP = auto()
-    TOGGLE_BACKGROUND = auto()
-    TOGGLE_LABELS = auto()
-    TOGGLE_GRID = auto()
-    ISOMETRIC_TILE_SELECTED = auto()
-    ISOMETRIC_ENTITY_SELECTED = auto()
-    ISOMETRIC_TARGET_SET = auto()
-    LOAD_BATTLEMAP = auto()
-    BATTLEMAP_LOADED = auto()
 
 class GameEvent:
     def __init__(self, type: GameEventType, data: Dict[str, Any] = {}):
@@ -53,8 +45,10 @@ class EventHandler:
         event = GameEvent(event_type, data)
         self.handle_game_event(event)
 
+# Global event handler instance
 event_handler = EventHandler()
 
+# Decorators for easy event handling registration
 def handle_pygame_event(event_type: int):
     def decorator(func: Callable[[pygame.event.Event], None]):
         event_handler.register_pygame_handler(event_type, func)
@@ -66,3 +60,28 @@ def handle_game_event(event_type: GameEventType):
         event_handler.register_game_handler(event_type, func)
         return func
     return decorator
+
+# Example usage:
+@handle_pygame_event(pygame_gui.UI_BUTTON_PRESSED)
+def on_button_pressed(event: pygame.event.Event):
+    print(f"Button pressed: {event.ui_element} dioporco")
+
+@handle_game_event(GameEventType.ENTITY_SELECTED)
+def on_entity_selected(event: GameEvent):
+    print(f"Entity selected: {event.data.get('entity_id')}")
+
+@handle_game_event(GameEventType.TILE_SELECTED)
+def on_tile_selected(event: GameEvent):
+    print(f"Tile selected: {event.data.get('position')}")
+
+@handle_game_event(GameEventType.TARGET_SET)
+def on_target_set(event: GameEvent):
+    print(f"Target set: {event.data.get('target_position')}")
+
+# In your main loop:
+# for event in pygame.event.get():
+#     event_handler.handle_pygame_event(event)
+#     ui_manager.process_events(event)
+#
+# To dispatch a game event:
+# event_handler.dispatch_game_event(GameEventType.ENTITY_SELECTED, {"entity_id": "goblin_1"})

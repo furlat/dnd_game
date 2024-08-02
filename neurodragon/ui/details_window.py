@@ -4,7 +4,6 @@ from pygame_gui.elements import UIWindow, UITextBox, UIImage
 from neurorefactor.config import config
 from neurorefactor.event_handler import handle_game_event, GameEventType, GameEvent
 from dnd.battlemap import Entity
-from typing import Optional
 
 class DetailsWindow(UIWindow):
     def __init__(self, rect: pygame.Rect, manager: pygame_gui.UIManager):
@@ -76,9 +75,7 @@ class DetailsWindow(UIWindow):
 
         self.update_image(tile_type, sprite_path)
 
-    def update_entity_details(self, entity: Optional[Entity]):
-        if entity is None:
-            return
+    def update_entity_details(self, entity: Entity):
         details = f"Name: {entity.name}<br>HP: {entity.hp}/{entity.health.max_hit_points}<br>ID: {entity.id}"
         self.text_element.set_text(details)
 
