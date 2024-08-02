@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='neurodragon',
+    name='neurorefactor',
     packages=find_packages(),    
 )
