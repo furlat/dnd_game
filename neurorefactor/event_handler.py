@@ -10,6 +10,9 @@ class GameEventType(Enum):
     FOV_UPDATED = auto()
     PATH_UPDATED = auto()
     ACTION_PERFORMED = auto()
+    ACTION_LOG = auto()
+    UPDATE_ACTIONS = auto()
+    RENDER_BATTLEMAP = auto()
 
 class GameEvent:
     def __init__(self, type: GameEventType, data: Dict[str, Any] = {}):
@@ -61,7 +64,7 @@ def handle_game_event(event_type: GameEventType):
 # Example usage:
 @handle_pygame_event(pygame_gui.UI_BUTTON_PRESSED)
 def on_button_pressed(event: pygame.event.Event):
-    print(f"Button pressed: {event.ui_element}")
+    print(f"Button pressed: {event.ui_element} dioporco")
 
 @handle_game_event(GameEventType.ENTITY_SELECTED)
 def on_entity_selected(event: GameEvent):

@@ -9,10 +9,12 @@ class WindowConfig(BaseModel):
 
 class UIConfig(BaseModel):
     battlemap_window: Dict[str, int] = Field(default_factory=lambda: {"left": 10, "top": 10, "width": 1052, "height": 800})
-    details_window: Dict[str, int] = Field(default_factory=lambda: {"left": 1020, "top": 10, "width": 400, "height": 400})
-    active_entity_window: Dict[str, int] = Field(default_factory=lambda: {"left": 10, "bottom": 820, "width": 500, "height": 200})
-    target_window: Dict[str, int] = Field(default_factory=lambda: {"right": 690, "bottom": 820, "width": 500, "height": 200})
-    actions_window: Dict[str, int] = Field(default_factory=lambda: {"right": 10, "top": 10, "width": 300, "height": 800})
+    details_window: Dict[str, int] = Field(default_factory=lambda: {"left": 1072, "top": 10, "width": 400, "height": 400})
+    actions_window: Dict[str, int] = Field(default_factory=lambda: {"left": 1072, "top": 420, "width": 400, "height": 590})
+    logger_window: Dict[str, int] = Field(default_factory=lambda: {"left": 10, "top": 820, "width": 1052, "height": 190})
+    active_entity_window: Dict[str, int] = Field(default_factory=lambda: {"left": 1482, "top": 10, "width": 208, "height": 500})
+    target_window: Dict[str, int] = Field(default_factory=lambda: {"left": 1482, "top": 520, "width": 208, "height": 490})
+    
 class ThemeConfig(BaseModel):
     path: str = "assets/themes/theme.json"
 

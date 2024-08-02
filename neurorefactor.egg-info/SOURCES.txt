@@ -18,6 +18,10 @@ neurorefactor.egg-info/SOURCES.txt
 neurorefactor.egg-info/dependency_links.txt
 neurorefactor.egg-info/top_level.txt
 neurorefactor/ui/__init__.py
+neurorefactor/ui/actions_window.py
+neurorefactor/ui/active_entity_window.py
 neurorefactor/ui/battlemap_renderer.py
 neurorefactor/ui/battlemap_window.py
 neurorefactor/ui/details_window.py
+neurorefactor/ui/logger_window.py
+neurorefactor/ui/target_window.py

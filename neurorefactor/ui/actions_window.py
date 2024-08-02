@@ -10,6 +10,10 @@ from neurorefactor.event_handler import event_handler, handle_game_event, GameEv
 
 class ActionsWindow(UIWindow):
     def __init__(self, rect: pygame.Rect, manager: pygame_gui.UIManager):
+        # Ensure minimum dimensions
+        rect.width = max(rect.width, 100)
+        rect.height = max(rect.height, 100)
+        
         super().__init__(rect, manager, window_display_title='Available Actions')
 
         self.active_entity: Optional[Entity] = None
@@ -24,15 +28,13 @@ class ActionsWindow(UIWindow):
             container=self
         )
 
-        container_height = rect.height - 50
+        container_height = max(rect.height - 50, 1)  # Ensure positive height
+        print(f"Creating scrolling container. Width: {rect.width}, Height: {container_height}")
         self.actions_container = UIScrollingContainer(
             relative_rect=pygame.Rect(0, 50, rect.width, container_height),
             manager=manager,
             container=self
         )
-
-        # Set initial scrollable area to be slightly larger than the container
-        self.actions_container.set_scrollable_area_dimensions((rect.width, container_height + 1))
 
         self.setup_event_handlers()
 
@@ -49,6 +51,7 @@ class ActionsWindow(UIWindow):
                 self.update_actions(self.active_entity)
 
     def update_actions(self, entity: Optional[Entity], target_entity: Optional[Entity] = None):
+        print(f"Updating actions for entity: {entity}")
         self.active_entity = entity
         self.target_entity = target_entity
         if entity is not None:
@@ -58,14 +61,16 @@ class ActionsWindow(UIWindow):
         self._create_action_buttons()
 
     def _create_action_buttons(self):
+        print(f"Creating action buttons. Number of actions: {len(self.actions)}")
         for button in self.action_buttons:
             button.kill()
         self.action_buttons.clear()
 
         button_height = 50
         spacing = 5
-        total_height = max(len(self.actions) * (button_height + spacing), self.actions_container.rect.height + 1)
+        total_height = max(len(self.actions) * (button_height + spacing), self.actions_container.rect.height)
         
+        print(f"Setting scrollable area dimensions. Width: {self.actions_container.rect.width}, Height: {total_height}")
         self.actions_container.set_scrollable_area_dimensions((self.actions_container.rect.width, total_height))
 
         for i, action in enumerate(self.actions):
@@ -80,11 +85,10 @@ class ActionsWindow(UIWindow):
             self.action_buttons.append(button)
 
     def _get_button_theme(self, action: Action) -> str:
-        print(f"Checking button theme for action: {action.name}")
         if isinstance(action, Attack) and self.target_entity:
             context = {"action": action}
-            can_perform, details = action.check_prerequisites(self.active_entity, self.target_entity, context)
-            print(f"Action: {action.name}, Can Perform: {can_perform} with details {details}")
+            can_perform, _ = action.check_prerequisites(self.active_entity, self.target_entity, context)
+            print(f"Checking prerequisites for action {action.name}: {can_perform}")
             return "@action_button_green" if can_perform else "@action_button_red"
         elif isinstance(action, MovementAction):
             return "@action_button_blue"
@@ -105,19 +109,31 @@ class ActionsWindow(UIWindow):
         if self.active_entity:
             self.active_entity.action_economy.reset()
             event_handler.dispatch_game_event(GameEventType.UPDATE_ACTIONS, {"entity": self.active_entity})
+            event_handler.dispatch_game_event(GameEventType.RENDER_BATTLEMAP)
 
     def _handle_action_click(self, action_index: int):
         if 0 <= action_index < len(self.actions):
             action: Action = self.actions[action_index]
             result = action.apply(self.active_entity, self.target_entity)
-            event_handler.dispatch_game_event(GameEventType.ACTION_PERFORMED, {
-                "action": action,
-                "result": result,
-                "attacker": self.active_entity,
-                "defender": self.target_entity
-            })
+            #onyl dispatch attacks 
+            if isinstance(action, Attack):
+                event_handler.dispatch_game_event(GameEventType.ACTION_PERFORMED, {
+                    "action": action,
+                    "result": result,
+                    "attacker": self.active_entity,
+                    "defender": self.target_entity
+                })
             self.update_actions(self.active_entity, self.target_entity)
+            event_handler.dispatch_game_event(GameEventType.RENDER_BATTLEMAP)  # Add this line
 
 def create_actions_window(manager: pygame_gui.UIManager) -> ActionsWindow:
-    window_rect = pygame.Rect(**config.ui.actions_window)
+    config_rect = config.ui.actions_window
+    # Ensure minimum dimensions and positive values
+    width = max(config_rect.get('width', 100), 100)
+    height = max(config_rect.get('height', 100), 100)
+    left = max(config_rect.get('left', 0), 0)
+    top = max(config_rect.get('top', 0), 0)
+    
+    window_rect = pygame.Rect(left, top, width, height)
+    print(f"Creating ActionsWindow with rect: {window_rect}")
     return ActionsWindow(window_rect, manager)

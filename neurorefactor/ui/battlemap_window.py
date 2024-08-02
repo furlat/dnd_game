@@ -24,7 +24,6 @@ class BattleMapWindow(UIWindow):
         self.button_size = config.sprites.size
         self.grey_column_width = 1.5*self.button_size[0] + 6
 
-        # Adjust map surface width to account for the button column
         self.map_surface = pygame.Surface((self.rect.width - self.grey_column_width, self.rect.height))
         self.offset = (0, 0)
         self.grid_positions: Dict[Tuple[int, int], Tuple[int, int]] = {}
@@ -77,11 +76,6 @@ class BattleMapWindow(UIWindow):
             button_y += self.button_size[1]
 
     def setup_event_handlers(self):
-        @handle_pygame_event(pygame_gui.UI_BUTTON_PRESSED)
-        def on_button_pressed(event: pygame.event.Event):
-            if event.ui_element in self.buttons:
-                self.handle_button_press(event.ui_element)
-
         @handle_game_event(GameEventType.ENTITY_SELECTED)
         def on_entity_selected(event: GameEvent):
             self.selected_entity = event.data['entity']
@@ -91,6 +85,18 @@ class BattleMapWindow(UIWindow):
         def on_target_set(event: GameEvent):
             self.target_position = event.data['position']
             self.render_battlemap()
+
+        @handle_game_event(GameEventType.RENDER_BATTLEMAP)
+        def on_render_battlemap(event: GameEvent):
+            self.render_battlemap()
+        
+        @handle_pygame_event(pygame_gui.UI_BUTTON_PRESSED)
+        def on_button_pressed(event: pygame.event.Event):
+            if event.ui_element in self.buttons:
+                self.handle_button_press(event.ui_element)
+
+
+
 
     def render_battlemap(self):
         self.map_surface = render_battlemap(
@@ -119,30 +125,79 @@ class BattleMapWindow(UIWindow):
                     self.grid_positions[(x, y)] = (draw_x, draw_y)
 
     def handle_click(self, click_pos: Tuple[int, int], click_type: str):
+        grid_pos = self.get_grid_position(click_pos)
+        if grid_pos:
+            if click_type == 'left':
+                self.handle_left_click(grid_pos)
+            elif click_type == 'double':
+                self.handle_double_left_click(grid_pos)
+            elif click_type == 'right':
+                self.handle_right_click(grid_pos)
+
+    def handle_left_click(self, grid_pos: Tuple[int, int]):
+        tile_type = self.battle_map.get_tile(*grid_pos)
+        entity_ids = self.battle_map.positions.get(grid_pos, None)
+        entity_name = None
+        sprite_path = None
+
+        if entity_ids:
+            entity_ids = list(entity_ids)
+            entity = Entity.get_instance(entity_ids[0])
+            entity_name = entity.name
+            sprite_path = config.sprites.paths.get(entity_name)
+        else:
+            sprite_path = config.sprites.paths.get(tile_type)
+
+        event_handler.dispatch_game_event(GameEventType.TILE_SELECTED, {
+            "position": grid_pos,
+            "tile_type": tile_type,
+            "entity_name": entity_name,
+            "sprite_path": sprite_path,
+            "battle_map": self.battle_map
+        })
+
+    def handle_double_left_click(self, grid_pos: Tuple[int, int]):
+        entity_ids = self.battle_map.positions.get(grid_pos, None)
+        if entity_ids:
+            entity_id = list(entity_ids)[0]
+            entity = Entity.get_instance(entity_id)
+            self.selected_entity = entity
+            print(f"Selected entity: {entity}")  # Debug print
+            event_handler.dispatch_game_event(GameEventType.ENTITY_SELECTED, {"entity": entity})
+        else:
+            self.selected_entity = None
+            print("No entity selected")  # Debug print
+            event_handler.dispatch_game_event(GameEventType.ENTITY_SELECTED, {"entity": None})
+        self.render_battlemap()
+
+    def handle_right_click(self, grid_pos: Tuple[int, int]):
+        entity_ids = self.battle_map.positions.get(grid_pos, None)
+        if entity_ids:
+            entity_id = list(entity_ids)[0]
+            entity = Entity.get_instance(entity_id)
+            event_handler.dispatch_game_event(GameEventType.TARGET_SET, {"entity": entity, "position": grid_pos})
+        else:
+            event_handler.dispatch_game_event(GameEventType.TARGET_SET, {"position": grid_pos})
+        self.render_battlemap()
+
+    def get_grid_position(self, click_pos: Tuple[int, int]) -> Optional[Tuple[int, int]]:
         tile_size = 32
         container_rect = self.get_container().get_relative_rect()
         adjusted_click_pos = (
-            click_pos[0] - self.rect.left - container_rect.left - 12,  # Adjusted left offset
+            click_pos[0] - self.rect.left - container_rect.left - 12,
             click_pos[1] - self.rect.top - container_rect.top - 16
         )
 
         for grid_pos, draw_pos in self.grid_positions.items():
             if (draw_pos[0] <= adjusted_click_pos[0] < draw_pos[0] + tile_size and
                 draw_pos[1] <= adjusted_click_pos[1] < draw_pos[1] + tile_size):
-                if click_type == 'left':
-                    event_handler.dispatch_game_event(GameEventType.TILE_SELECTED, {"position": grid_pos, "battle_map": self.battle_map})
-                elif click_type == 'right':
-                    event_handler.dispatch_game_event(GameEventType.TARGET_SET, {"position": grid_pos})
-                
-                entity_ids = self.battle_map.positions.get(grid_pos, None)
-                if entity_ids:
-                    entity_id = list(entity_ids)[0]
-                    entity = Entity.get_instance(entity_id)
-                    event_handler.dispatch_game_event(GameEventType.ENTITY_SELECTED, {"entity": entity})
-                break
+                return grid_pos
+        return None
 
     def handle_button_press(self, button: UIButton):
+        print(f"Button pressed: {button.tool_tip_text}")
         if button.tool_tip_text == 'Toggle FOV':
+            print("Toggling FOV")
             self.fov_mode = not self.fov_mode
         elif button.tool_tip_text == 'Color FOV':
             self.color_fov_mode = not self.color_fov_mode
