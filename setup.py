@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='neurorefactor',
+    name='dndeditor',
     packages=find_packages(),    
 )
